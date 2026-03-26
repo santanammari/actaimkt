@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACT.AI — Calendário Editorial</title>
+<style>
+/* ── LOGIN SCREEN ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+#login-screen{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:#0A2F4E;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{background:#fff;border-radius:16px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center}
+.login-logo{font-size:28px;font-weight:800;color:#0A2F4E;letter-spacing:.04em;margin-bottom:6px}
+.login-logo span{color:#5DCAA5}
+.login-sub{font-size:13px;color:#5F6B7A;margin-bottom:28px;line-height:1.5}
+.login-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#5F6B7A;display:block;text-align:left;margin-bottom:6px}
+.login-input{width:100%;padding:11px 14px;border:1.5px solid #DDE3EA;border-radius:10px;font-size:14px;color:#1A1A2E;transition:border-color .14s;outline:none;font-family:inherit}
+.login-input:focus{border-color:#0A2F4E}
+.login-btn{width:100%;margin-top:16px;padding:12px;background:#0A2F4E;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:background .14s;font-family:inherit}
+.login-btn:hover{background:#0D7F5F}
+.login-error{color:#A32D2D;font-size:12px;margin-top:10px;min-height:18px}
+.login-lock{font-size:36px;margin-bottom:16px}
+/* ── APP (hidden until auth) ── */
+#app-screen{display:none}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-lock">🔒</div>
+    <div class="login-logo">ACT<span>.</span>AI</div>
+    <div class="login-sub">Calendário Editorial LinkedIn<br>Acesso restrito à equipe</div>
+    <label class="login-label">Senha de acesso</label>
+    <input class="login-input" type="password" id="pw" placeholder="Digite a senha" onkeydown="if(event.key==='Enter')checkPw()">
+    <button class="login-btn" onclick="checkPw()">Entrar →</button>
+    <div class="login-error" id="pw-err"></div>
+  </div>
+</div>
+
+<!-- APP SCREEN (injected after auth) -->
+<div id="app-screen"></div>
+
+<script>
+// ── AUTH GATE ──────────────────────────────────────────────
+const _PW = 'actaimkt2026';
+const _SK = 'actai_auth_v1';
+
+function checkPw() {
+  const v = document.getElementById('pw').value;
+  if (v === _PW) {
+    sessionStorage.setItem(_SK, '1');
+    showApp();
+  } else {
+    const err = document.getElementById('pw-err');
+    err.textContent = 'Senha incorreta. Tente novamente.';
+    document.getElementById('pw').value = '';
+    document.getElementById('pw').focus();
+    setTimeout(() => err.textContent = '', 3000);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem(_SK) === '1') {
+    showApp();
+  } else {
+    document.getElementById('pw').focus();
+  }
+});
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  if (!document.getElementById('app-screen').innerHTML.trim()) {
+    injectApp();
+  }
+}
+
+// ── APP INJECTION ──────────────────────────────────────────
+function injectApp() {
+  const appDiv = document.getElementById('app-screen');
+  appDiv.innerHTML = getAppHTML();
+  // Run all scripts inside the injected HTML
+  appDiv.querySelectorAll('script').forEach(oldScript => {
+    const newScript = document.createElement('script');
+    if (oldScript.src) {
+      newScript.src = oldScript.src;
+    } else {
+      newScript.textContent = oldScript.textContent;
+    }
+    document.body.appendChild(newScript);
+    oldScript.remove();
+  });
+}
+
+function getAppHTML() {
+return `
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#0A2F4E;--accent:#0D7F5F;--teal:#1D9E75;--purple:#534AB7;
+  --amber:#BA7517;--text:#1A1A2E;--muted:#5F6B7A;
+  --card:#fff;--border:#DDE3EA;--border2:#C4CDD8;--bg:#EEF2F7;--surf:#F4F7FA;
+  --c-edu:#378ADD;--c-prod:#7F77DD;--c-aut:#1D9E75;--c-inst:#BA7517;--c-vid:#5DCAA5;
+  --bg-est:#E6F1FB;--fg-est:#0C447C;
+  --bg-car:#EEEDFE;--fg-car:#3C3489;
+  --bg-vid:#E1F5EE;--fg-vid:#085041;
+  --bg-act:#FAEEDA;--fg-act:#633806;
+  --bg-pil:#F0F3F7;--fg-pil:#4A5568;
+  --bg-icp:#E1F5EE;--fg-icp:#085041;
+  --bg-prod:#EEEDFE;--fg-prod:#3C3489;
+  --r:12px;--rs:8px;
+  --sh:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  --shm:0 4px 12px rgba(0,0,0,.09),0 2px 4px rgba(0,0,0,.05);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+.topbar{background:var(--brand);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.logo{font-size:17px;font-weight:700;color:#fff;letter-spacing:.04em}
+.logo span{color:var(--c-vid)}
+.topbar-meta{font-size:12px;color:rgba(255,255,255,.5);padding-left:12px;border-left:1px solid rgba(255,255,255,.15)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{font-size:12px;padding:6px 14px;border-radius:var(--rs);border:1px solid rgba(255,255,255,.25);background:transparent;color:rgba(255,255,255,.85);cursor:pointer;font-weight:500;transition:all .14s}
+.tb-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4)}
+.tb-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.tb-btn.primary:hover{background:#0b6b50}
+.tb-btn.danger{background:#A32D2D;border-color:#A32D2D;color:#fff}
+.tb-btn.logout{border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.55);font-size:11px}
+.mode-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:0;height:42px}
+.mode-btn{font-size:13px;font-weight:500;padding:0 18px;height:42px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .14s}
+.mode-btn:hover{color:var(--brand)}
+.mode-btn.on{color:var(--brand);border-bottom-color:var(--brand)}
+.wrap{max-width:920px;margin:0 auto;padding:1.75rem 1.5rem 5rem}
+.page-head{margin-bottom:1.5rem}
+.page-head h1{font-size:22px;font-weight:700;color:var(--brand);margin-bottom:3px}
+.page-head p{font-size:13px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:12px 15px;box-shadow:var(--sh)}
+.stat-n{font-size:24px;font-weight:700;color:var(--brand);line-height:1}
+.stat-l{font-size:11px;color:var(--muted);margin-top:2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:1.25rem;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;box-shadow:var(--sh)}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center}
+.fb{font-size:12px;padding:5px 13px;border-radius:99px;border:1px solid var(--border2);background:var(--card);color:var(--muted);cursor:pointer;transition:all .13s;font-weight:500;box-shadow:var(--sh)}
+.fb:hover{border-color:var(--brand);color:var(--brand)}
+.fb.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.add-btn{margin-left:auto;font-size:12px;padding:5px 14px;border-radius:var(--rs);border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-weight:600;transition:all .13s}
+.add-btn:hover{background:#0b6b50}
+.month-section{margin-bottom:2.5rem}
+.month-header{font-size:18px;font-weight:700;color:var(--brand);margin-bottom:1rem;padding-bottom:10px;border-bottom:2px solid var(--accent)}
+.wk{margin-bottom:1.75rem}
+.wk-lbl{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;padding-left:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--sh);overflow:hidden;transition:box-shadow .13s,border-color .13s}
+.card:hover{box-shadow:var(--shm);border-color:var(--border2)}
+.card.open{border-color:var(--border2);box-shadow:var(--shm)}
+.card.drag-over{border:2px dashed var(--accent);opacity:.85}
+.card.dragging{opacity:.4}
+.ch{display:grid;grid-template-columns:66px 5px 1fr auto;align-items:center;gap:13px;padding:13px 16px;cursor:pointer;user-select:none}
+.ch:hover{background:#FAFBFD}
+.db{text-align:center}
+.dd{font-size:20px;font-weight:700;color:var(--brand);line-height:1}
+.di{font-size:11px;color:var(--muted);margin-top:2px}
+.bar{width:5px;border-radius:3px;align-self:stretch;min-height:44px}
+.cm{min-width:0}
+.ct{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px;line-height:1.3}
+.cb{display:flex;gap:5px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.b-est{background:var(--bg-est);color:var(--fg-est)}
+.b-car{background:var(--bg-car);color:var(--fg-car)}
+.b-vid{background:var(--bg-vid);color:var(--fg-vid)}
+.b-act{background:var(--bg-act);color:var(--fg-act)}
+.b-pil{background:var(--bg-pil);color:var(--fg-pil);font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500}
+.card-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .13s}
+.icon-btn:hover{background:var(--surf);color:var(--brand);border-color:var(--border2)}
+.icon-btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.icon-btn.del:hover{background:#FCEBEB;color:#A32D2D;border-color:#F09595}
+.chev{width:22px;height:22px;border-radius:50%;background:var(--surf);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);transition:transform .18s,background .13s;flex-shrink:0}
+.card.open .chev{transform:rotate(180deg);background:var(--border)}
+.det{display:none;border-top:1px solid var(--border);background:#FAFBFD}
+.card.open .det{display:block}
+.det-meta{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px}
+.dl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:5px}
+.dt{font-size:13px;color:var(--muted);line-height:1.65}
+.pill-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.icp-p{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg-icp);color:var(--fg-icp);font-weight:500}
+.prod-p{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg-prod);color:var(--fg-prod);font-weight:500}
+.det-hook{padding:0 16px 16px}
+.hook-box{border-left:3px solid var(--purple);padding:11px 14px;background:#fff;border-radius:0 var(--rs) var(--rs) 0;font-size:13px;color:var(--text);line-height:1.65;box-shadow:var(--sh)}
+.hook-box.vid{border-left-color:var(--teal)}
+.hook-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:4px;color:var(--purple)}
+.hook-box.vid .hook-lbl{color:var(--teal)}
+.det-tabs{border-top:1px solid var(--border)}
+.tab-nav{display:flex;border-bottom:1px solid var(--border);background:#fff}
+.tab-btn{font-size:12px;font-weight:600;padding:9px 16px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .13s}
+.tab-btn:hover{color:var(--brand)}
+.tab-btn.on{color:var(--brand);border-bottom-color:var(--brand)}
+.tab-panel{display:none;padding:16px}
+.tab-panel.on{display:block}
+.slide-row{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border)}
+.slide-row:last-child{border-bottom:none;padding-bottom:0}
+.slide-row:first-child{padding-top:0}
+.sn{font-size:11px;font-weight:700;min-width:60px;padding-top:1px;flex-shrink:0}
+.slide-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:3px}
+.st{font-size:13px;color:var(--muted);line-height:1.6;white-space:pre-line}
+.full-text{font-size:13px;color:var(--text);line-height:1.8;white-space:pre-line;background:#fff;border:1px solid var(--border);border-radius:var(--rs);padding:15px}
+.copy-btn{margin-top:9px;font-size:12px;padding:5px 13px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-weight:500;transition:all .13s}
+.copy-btn:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.copy-btn.copied{background:var(--teal);color:#fff;border-color:var(--teal)}
+.scene-block{background:#fff;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:10px;overflow:hidden}
+.scene-block:last-child{margin-bottom:0}
+.scene-head{background:#E1F5EE;padding:7px 13px;font-size:11px;font-weight:700;color:#085041;letter-spacing:.06em;text-transform:uppercase}
+.scene-body{padding:13px;display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.scene-col-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}
+.scene-col-text{font-size:13px;color:var(--text);line-height:1.7;white-space:pre-line}
+.scene-col-text.narr{color:var(--teal);font-style:italic}
+.overlay{display:none;position:fixed;inset:0;background:rgba(10,47,78,.45);z-index:500;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--r);width:100%;max-width:760px;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-head h2{font-size:16px;font-weight:700;color:var(--brand)}
+.modal-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer;font-size:16px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all .13s}
+.modal-close:hover{background:var(--surf);color:var(--text)}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:14px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);background:#fff;font-family:inherit;transition:border-color .13s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brand)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.6}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.slides-editor{border:1px solid var(--border);border-radius:var(--rs);overflow:hidden}
+.slide-ed-item{padding:12px;border-bottom:1px solid var(--border);background:#fff}
+.slide-ed-item:last-child{border-bottom:none}
+.slide-ed-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.slide-ed-head span{font-size:11px;font-weight:700;color:var(--purple)}
+.slide-ed-del{margin-left:auto;font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid #F09595;background:transparent;color:#A32D2D;cursor:pointer}
+.add-slide-btn{width:100%;padding:9px;border:none;background:var(--surf);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .13s}
+.add-slide-btn:hover{background:var(--border);color:var(--brand)}
+.scene-ed-item{padding:12px;border-bottom:1px solid var(--border);background:#fff}
+.scene-ed-item:last-child{border-bottom:none}
+.scene-ed-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.scene-ed-head span{font-size:11px;font-weight:700;color:var(--teal)}
+.drag-handle{cursor:grab;color:var(--muted);font-size:14px;padding:0 4px;user-select:none;opacity:.5}
+.drag-handle:hover{opacity:1}
+.drag-handle:active{cursor:grabbing}
+.drop-zone{height:6px;border-radius:3px;margin:2px 0;transition:all .15s;background:transparent}
+.drop-zone.dz-active{height:28px;background:var(--bg-vid);border:2px dashed var(--accent);border-radius:var(--rs)}
+.confirm-modal{background:#fff;border-radius:var(--r);width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.2);margin:auto;padding:24px}
+.confirm-modal h3{font-size:16px;font-weight:700;color:var(--brand);margin-bottom:8px}
+.confirm-modal p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.confirm-modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--brand);color:#fff;font-size:13px;font-weight:500;padding:10px 18px;border-radius:var(--rs);box-shadow:var(--shm);z-index:999;transform:translateY(80px);opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--teal)}
+.toast.error{background:#A32D2D}
+.foot{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.foot p{font-size:12px;color:var(--muted)}
+.foot a{color:var(--accent);text-decoration:none;font-weight:600;font-size:12px}
+@media(max-width:640px){
+  .wrap{padding:1.25rem 1rem 3rem}
+  .stats{grid-template-columns:1fr 1fr}
+  .det-meta{grid-template-columns:1fr}
+  .scene-body{grid-template-columns:1fr}
+  .field-row,.field-row3{grid-template-columns:1fr}
+  .topbar-meta{display:none}
+}
+</style>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">ACT<span>.</span>AI</div>
+    <div class="topbar-meta">Calendário Editorial LinkedIn · Editor</div>
+  </div>
+  <div class="topbar-right">
+    <button class="tb-btn" onclick="exportJSON()">Exportar JSON</button>
+    <button class="tb-btn" onclick="importJSON()">Importar</button>
+    <button class="tb-btn primary" id="save-btn" onclick="saveData()">Salvar</button>
+    <button class="tb-btn logout" onclick="doLogout()">Sair</button>
+  </div>
+</div>
+
+<div class="mode-bar">
+  <button class="mode-btn on" onclick="setMode('view',this)">Visualizar</button>
+  <button class="mode-btn" onclick="setMode('edit',this)">Modo edição</button>
+</div>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1 id="cal-title" contenteditable="false">Calendário Editorial LinkedIn</h1>
+    <p id="cal-sub" contenteditable="false">24 mar – 21 abr 2026 · 9 publicações · cadência terças e quintas</p>
+  </div>
+  <div class="stats" id="stats-bar"></div>
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:var(--c-edu)"></div>Educação de mercado</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c-prod)"></div>Produto &amp; solução</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c-aut)"></div>Autoridade técnica</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c-inst)"></div>Institucional</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--c-vid)"></div>Vídeo · trilogia ACT</div>
+  </div>
+  <div class="filters">
+    <button class="fb on" onclick="filt('todos',this)">Todos</button>
+    <button class="fb" onclick="filt('estatico',this)">Estático</button>
+    <button class="fb" onclick="filt('carrossel',this)">Carrossel</button>
+    <button class="fb" onclick="filt('video',this)">Vídeo</button>
+    <button class="fb" onclick="filt('marco',this)">Março</button>
+    <button class="fb" onclick="filt('abril',this)">Abril</button>
+    <button class="add-btn" id="add-btn" style="display:none" onclick="openAdd()">+ Novo post</button>
+  </div>
+  <div id="cal"></div>
+  <div class="foot">
+    <p>Cadência: terças e quintas · Horário ideal: 8h–9h ou 12h–13h · Vídeos: motion com narração, aprox. 75s</p>
+    <a href="https://healthcare.actai.ai" target="_blank">healthcare.actai.ai</a>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <h2 id="modal-title">Editar post</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="tb-btn" onclick="closeModal()">Cancelar</button>
+      <button class="tb-btn primary" onclick="savePost()">Salvar post</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="confirm-overlay" onclick="confirmOverlayClick(event)">
+  <div class="confirm-modal">
+    <h3>Remover post</h3>
+    <p>Tem certeza que quer remover este post? A ação não pode ser desfeita.</p>
+    <div class="confirm-modal-btns">
+      <button class="tb-btn" onclick="closeConfirm()">Cancelar</button>
+      <button class="tb-btn danger" onclick="confirmDelete()">Remover</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="import-input" accept=".json" style="display:none" onchange="handleImport(event)">
+<div class="toast" id="toast"></div>
+
+<script>
+function doLogout(){
+  sessionStorage.removeItem('actai_auth_v1');
+  location.reload();
+}
+
+const DEFAULT_DATA = [
+  {id:'p1',day:'24',mon:'Mar',dow:'Ter',mes:'marco',tipo:'video',bar:'var(--c-vid)',title:'Vídeo 1 — A de Accurate',pil:'Vídeo motion · trilogia ACT',act:'A — Accurate',icp:['Gestores hospitalares','Líderes de dados','Diretores de suprimentos'],produto:['Gestor de Insumos','Plataforma ACT.AI'],just:'Abre a trilogia e o calendário inteiro. Enquadramento de brand awareness: ACT como o padrão que define uma IA confiável na saúde. Ana aparece pela primeira vez e atravessa os três vídeos. Figurante contextual no V1 é o colega de TI.',hookLbl:'Narração de abertura',hook:'A gente vive num momento em que todo mundo quer aplicar IA na saúde. Mas ninguém para e pergunta: IA confiável segundo qual padrão? Na ACT.AI, a resposta começa com a primeira letra: Accurate.',isVideo:true,scenes:[{head:'Cena 1 — Ana e o cadastro bagunçado',visual:'Fundo off-white. Ana entra em quadro à esquerda: forma simples, azul escuro, postura ereta. À direita, o monitor mostra um sistema de cadastro com o mesmo insumo em três linhas — nomes diferentes, vermelho. Ao fundo, desfocado em cinza, um figurante (colega de TI) está sentado na mesma mesa, indiferente ao problema. Ana aponta para a tela com um gesto direto, postura de questionamento.',narr:'A gente vive num momento em que todo mundo quer aplicar IA na saúde.\nMas ninguém para e pergunta: IA confiável segundo qual padrão?\nTudo começa antes do algoritmo.\nComeça no dado que entra nele.'},{head:'Cena 2 — O erro sai do cadastro',visual:'Ana sai de quadro. A tela vira o elemento central. Animação minimalista: o item com nome errado se transforma num ícone que viaja por três caixas — cotação, pedido, faturamento. Cada caixa fica vermelha. O colega figurante aparece ao fundo recebendo um dos ícones vermelhos na tela, sem perceber.',narr:'Um dado desorganizado não fica onde foi cadastrado.\nEle viaja.\nAparece na cotação, no pedido, na cobrança.\nE quando chega na auditoria, o estrago já foi feito.'},{head:'Cena 3 — O Gestor de Insumos resolve',visual:'Ana volta ao centro. O Gestor de Insumos da ACT.AI aparece na tela: interface teal/branco, as três linhas duplicadas se contraem em uma única linha limpa, verde. Ana inclina o corpo levemente para frente — postura de reconhecimento. O figurante ao fundo também olha para a própria tela agora.',narr:'Ser Accurate significa que cada dado representa exatamente o que é.\nSem duplicidades. Sem quatro nomes para o mesmo produto.\nUma base onde a informação é confiável antes de qualquer análise começar.\nIsso não é detalhe. É pré-requisito.'},{head:'Cena 4 — Fechamento e expectativa da trilogia',visual:'Ana se afasta do monitor. Tela limpa e verde em foco. Fade para fundo escuro. Logo ACT.AI. A letra A se ilumina em teal. C e T em cinza claro. Tagline: "O padrão que define uma IA confiável na saúde."',narr:'Accurate é o primeiro dos três pilares que definem o padrão ACT.\nPorque inteligência artificial só entrega o que promete quando os dados que a alimentam são confiáveis.\nACT.AI. Accurate, Compliant, Traceable.\nEsse é o padrão que a saúde precisa.'}],legenda:'Um dado errado na saúde não fica parado onde foi inserido.\n\nEle viaja. Contamina a cotação. Distorce o estoque. Gera a glosa.\n\nA gente construiu a ACT.AI em cima de uma convicção: antes de aplicar qualquer inteligência, a base precisa ser confiável. Esse é o padrão ACT.\n\nAccurate. Compliant. Traceable.\n\nEssa é a primeira parte da nossa trilogia sobre o que define uma IA confiável na saúde. Os próximos dois vídeos vêm nas semanas seguintes.\n\n#ACTai #GovernanaDeDados #SaudeDigital #Healthtech #IA'},
+  {id:'p2',day:'26',mon:'Mar',dow:'Qui',mes:'marco',tipo:'carrossel',bar:'var(--c-prod)',title:'ICP Compras — O que sua área perde com dados desorganizados',pil:'Produto & solução · ICP Compras',act:null,icp:['Gestores de suprimentos','Diretores de compras','Auditoria'],produto:['Gestor de Insumos'],just:'Carrossel porque o público de compras é analítico e orientado a processo. Estrutura em slides permite construir o argumento em etapas.',hookLbl:'Legenda do post',hook:'Sua equipe busca o mesmo item com quatro descrições diferentes. Cada uma retorna um fornecedor. Nenhuma retorna certeza.',isVideo:false,slides:[{n:'Slide 1',titulo:'O problema que ninguém vê no orçamento',texto:'Sua equipe busca o mesmo item com quatro descrições diferentes. Cada uma retorna um fornecedor. Nenhuma retorna certeza.\n\nIsso não é um problema pontual. É o dia a dia de compras em hospitais com bases cadastrais desorganizadas.'},{n:'Slide 2',titulo:'O custo da duplicidade',texto:'Insumos e materiais respondem por 35% a 45% do orçamento operacional total de um hospital — o segundo maior custo, atrás apenas de pessoal.\n\nQuando a base cadastral é desorganizada, esse orçamento é gerido no escuro:\n• Compras redundantes de itens já disponíveis com outro nome\n• Perda de poder de negociação por volume pulverizado\n• Retrabalho na conciliação de notas e pedidos\n• Decisões baseadas em histórico fragmentado'},{n:'Slide 3',titulo:'Como a descrição errada contamina a decisão',texto:'"Luva cirúrgica estéril 7.0", "luva cirúrgica 7" e "luva estéril tamanho 7" são o mesmo produto.\n\nO sistema não sabe disso. Trata como três itens diferentes. O histórico fica partido. A análise de preço médio perde confiabilidade.'},{n:'Slide 4',titulo:'O que muda com o Gestor de Insumos da ACT.AI',texto:'Um catálogo padronizado onde cada produto tem uma única descrição técnica, confiável e rastreável.\n\nCom isso:\n• Cotações referenciadas no mesmo item, com histórico consolidado\n• Visibilidade de estoque antes de abrir qualquer pedido\n• Análise de fornecedor baseada em dados reais\n• Contratos com especificação técnica que sustenta a negociação'},{n:'Slide 5',titulo:'Uma pergunta pra fechar',texto:'Quantos itens do seu catálogo atual têm mais de uma descrição para o mesmo produto?\n\nSe você não tem essa resposta, é provável que o problema já esteja acontecendo.\n\nA ACT.AI organiza a base que sustenta as decisões de compras na saúde.\nhealthcare.actai.ai'}],legenda:'A cotação chegou. O fornecedor respondeu. O preço pareceu justo.\n\nMas o item comprado era o mesmo que já estava parado no estoque com outro nome no sistema.\n\nEsse é o custo invisível de uma base de insumos desorganizada.\n\nArrasta pra ver como a desorganização cadastral afeta a área de compras e o que muda quando você resolve na raiz.\n\n#GestaoDeCompras #Suprimentos #GestaoHospitalar #Insumos #SaudeDigital'},
+  {id:'p3',day:'31',mon:'Mar',dow:'Ter',mes:'marco',tipo:'carrossel',bar:'var(--c-prod)',title:'ICP Faturamento — A glosa começa antes da conta chegar',pil:'Produto & solução · ICP Faturamento',act:null,icp:['Gestores de faturamento','Auditoria','Diretores financeiros'],produto:['Gestor de Insumos'],just:'Carrossel porque glosas exigem construção lógica em etapas. Dado de ancoragem (Anahp 2025) cria credibilidade imediata.',hookLbl:'Legenda do post',hook:'Quando a operadora glosa uma cobrança, o problema já tem semanas de idade. Ele começou quando o insumo foi registrado com a descrição errada.',isVideo:false,slides:[{n:'Slide 1',titulo:'O erro que ninguém vê até a glosa chegar',texto:'O índice de glosa inicial nos hospitais privados brasileiros saltou de 11,89% em 2023 para 15,89% em 2024. No primeiro trimestre de 2025, atingiu média histórica de 17%. (Fonte: Observatório Anahp 2025)\n\nGrande parte dessas glosas tem origem em inconsistências de registro de materiais e medicamentos.'},{n:'Slide 2',titulo:'A cadeia do erro',texto:'Veja como um dado ruim percorre toda a operação:\n\n1. Insumo registrado com descrição incompleta ou código incorreto\n2. Prescrição sem especificação técnica adequada\n3. Dispensação sem rastreabilidade de lote ou fabricante\n4. Cobrança sem documentação suficiente\n5. Operadora questiona. Hospital não tem como responder. Glosa confirmada.'},{n:'Slide 3',titulo:'O que a operadora questiona',texto:'Quando uma cobrança é questionada, a operadora quer saber:\n\n• Qual foi o insumo utilizado, com especificação técnica completa\n• Qual o fabricante e número de lote\n• Qual a indicação clínica que justifica o uso\n• Se o item está no rol com o código correto'},{n:'Slide 4',titulo:'Como o Gestor de Insumos protege o faturamento',texto:'Com a base organizada pelo Gestor de Insumos:\n\n• Cada item tem descrição técnica padronizada e código correto desde o cadastro\n• O histórico de uso é rastreável por paciente, procedimento e lote\n• A cobrança é gerada com documentação que se sustenta numa auditoria\n• A contestação de glosa tem respaldo em dados, não em argumentação'},{n:'Slide 5',titulo:'A pergunta que vale um relatório inteiro',texto:'Das glosas de material ou medicamento que sua instituição recebeu nos últimos 90 dias, quantas poderiam ter sido evitadas com um registro mais preciso na origem?\n\nA ACT.AI organiza a base que sustenta o faturamento na saúde.\nhealthcare.actai.ai'}],legenda:'Quando a operadora glosa uma cobrança, o problema já tem semanas de idade.\n\nEle começou quando o insumo foi registrado com a descrição errada, sem o código correto, sem rastreabilidade suficiente pra sustentar a cobrança.\n\nEm 2024, o índice de glosa inicial chegou a 15,89% — R$ 5,8 bilhões retidos. Em 2025, bateu 17%. (Fonte: Observatório Anahp 2025)\n\nGlosa não é um problema de faturamento. É um problema de dados.\n\n#Faturamento #GlosaHospitalar #GestaoHospitalar #Healthtech #SaudeDigital'},
+  {id:'p4',day:'01',mon:'Abr',dow:'Qua',mes:'abril',tipo:'estatico',bar:'var(--c-edu)',title:'Por que as IAs alucinam? (Dia da Mentira)',pil:'Educação de mercado',act:null,icp:['Gestores hospitalares','Líderes de TI','Executivos healthtech'],produto:['Gestor de Insumos','Plataforma ACT.AI'],just:'Postado no Dia da Mentira (01/abr) para máximo aproveitamento do gancho cultural.',hookLbl:'Abertura do post',hook:'Hoje é o Dia da Mentira. Mas no setor de saúde, as alucinações de IA não esperam data marcada. Elas acontecem o ano inteiro.',isVideo:false,slides:[],textoCompleto:'Hoje é o Dia da Mentira.\n\nMas no setor de saúde, as alucinações de IA não esperam data marcada. Elas acontecem o ano inteiro.\n\nE o culpado quase nunca é o algoritmo. É o dado que entrou nele.\n\nDescrição de insumo errada. Código duplicado. Material cadastrado com quatro nomes diferentes. Medicamento sem rastreabilidade. Item sem correspondência TUSS.\n\nA IA não mente. Ela replica, com eficiência, o caos que já existia antes dela.\n\nExiste uma crença no mercado de que basta implementar inteligência artificial para resolver problemas operacionais. Mas IA aplicada sobre uma base desorganizada não gera inteligência. Gera ruído estruturado.\n\nPara ter dimensão do tamanho do problema: insumos e materiais respondem por 35% a 45% do orçamento operacional de um hospital. Quando a base que suporta essas decisões é desorganizada, esse volume inteiro é gerenciado no escuro.\n\nO maior problema da saúde não é falta de tecnologia. É falta de estrutura informacional confiável.\n\nÉ por isso que a ACT.AI começa pelo dado, não pela análise. O Gestor de Insumos organiza a base de materiais e medicamentos antes de qualquer camada de inteligência ser aplicada.\n\nDados precisos entram. Decisões confiáveis saem.\n\nSem a primeira parte, a segunda não existe.\n\n#GovernanaDeDados #InteligenciaArtificial #SaudeDigital #Healthtech #GestaoHospitalar',legenda:''},
+  {id:'p5',day:'07',mon:'Abr',dow:'Ter',mes:'abril',tipo:'video',bar:'var(--c-vid)',title:'Vídeo 2 — C de Compliant',pil:'Vídeo motion · trilogia ACT',act:'C — Compliant',icp:['Gestores de auditoria','Operadoras de saúde','Diretores financeiros'],produto:['Gestor de Insumos','Plataforma ACT.AI'],just:'Segundo vídeo da trilogia. Brand awareness: Compliant como o segundo pilar do padrão ACT. Figurante contextual é a auditora. A e C se iluminam juntos no fechamento.',hookLbl:'Narração de abertura',hook:'A regulação da saúde não para de crescer. Novas exigências. Novos padrões. Novos prazos. Uma IA confiável na saúde não pode ignorar isso. O segundo pilar do padrão ACT é Compliant.',isVideo:true,scenes:[{head:'Cena 1 — A notificação chega',visual:'Fundo off-white. Ana está ao centro, postura relaxada, olhando para o monitor. Uma notificação aparece na tela: "Auditoria ANS agendada." Ana endireita o corpo — postura de atenção imediata. Ao redor dela, ícones de siglas regulatórias surgem flutuando em cinza claro: ANS, ANVISA, TUSS.',narr:'A regulação da saúde não para de crescer.\nNovas exigências. Novos padrões. Novos prazos.\nE cada camada nova é uma oportunidade a mais pra um dado desconforme criar um problema que vai custar caro.\nUma IA confiável na saúde não pode ignorar isso.\nO segundo pilar do padrão ACT é Compliant.'},{head:'Cena 2 — O dado não está conforme',visual:'Ana abre o sistema. Itens aparecem com campos incorretos marcados em vermelho: código TUSS ausente, fabricante em branco, classificação incorreta. Ao fundo, a figurante auditora aparece em cinza — silhueta simples com prancheta — caminhando em direção à mesa de Ana.',narr:'Ser Compliant significa que seus dados estão alinhados com o que os reguladores e operadoras exigem.\nCódigo correto. Classificação correta. Documentação que sustenta cada cobrança.\nNão como exercício burocrático. Como proteção real da operação.'},{head:'Cena 3 — O Gestor de Insumos valida',visual:'A tela muda para o Gestor de Insumos. Os campos vazios são preenchidos automaticamente: código TUSS correto em verde, fabricante confirmado, classificação alinhada. Três checkmarks em sequência. Ana se vira para a auditora com postura confiante. A figurante inclina levemente o corpo, acenando com a cabeça.',narr:'O custo de não estar em conformidade não é abstrato.\nÉ a glosa que chegou. O contrato que foi questionado. A auditoria que consumiu semanas.\nDados conformes não são uma obrigação regulatória.\nSão a diferença entre uma instituição que se defende com dados e uma que se defende com argumentos.'},{head:'Cena 4 — Progressão da trilogia',visual:'Ana fecha o notebook. A figurante auditora sai de quadro. Fade para fundo escuro. Logo ACT.AI. A e C se iluminam juntos em teal. T em cinza, criando antecipação. Tagline: "O padrão que define uma IA confiável na saúde."',narr:'Compliant é o segundo dos três pilares que definem o padrão ACT.\nNa semana que vem, a trilogia fecha com o T: Traceable.\nACT.AI. Accurate, Compliant, Traceable.\nEsse é o padrão que a saúde precisa.'}],legenda:'A regulação da saúde no Brasil não para de crescer.\n\nANS, ANVISA, TUSS, auditorias de operadoras. Cada exigência nova é uma camada a mais sobre uma base que, na maioria das instituições, já está sobrecarregada.\n\nO segundo pilar do padrão ACT é Compliant. E ele não é sobre seguir regras por obrigação. É sobre ter dados que se sustentam quando alguém questionar.\n\nSegundo vídeo da trilogia sobre o que define uma IA confiável na saúde.\n\nNa semana que vem: T de Traceable.\n\n#ACTai #Compliance #SaudeDigital #Healthtech #GestaoHospitalar'},
+  {id:'p6',day:'09',mon:'Abr',dow:'Qui',mes:'abril',tipo:'estatico',bar:'var(--c-inst)',title:'Está mudando de sistema? Veja o que vai junto se a base não for limpa antes',pil:'Institucional & oportunidade',act:null,icp:['Diretores hospitalares','Líderes de TI','Gestores administrativos'],produto:['Serviço de limpeza de base via upload','Gestor de Insumos'],just:'Post estático como pergunta direta a quem está em processo de migração de ERP ou HIS. CTA conversacional abre prospecção orgânica nos comentários.',hookLbl:'Abertura do post',hook:'Trocar de sistema sem limpar a base é como se mudar de casa sem jogar nada fora. Você chega no lugar novo com as mesmas gavetas entupidas.',isVideo:false,slides:[],textoCompleto:'Trocar de sistema sem limpar a base é como se mudar de casa sem jogar nada fora.\n\nVocê chega no lugar novo com as mesmas gavetas entupidas.\n\nToda migração de ERP ou HIS é uma janela crítica. Uma oportunidade real de começar com dados organizados, descrições padronizadas e um catálogo que reflete a operação de verdade.\n\nMas a maioria das instituições não aproveita essa janela. Por pressão de prazo. Por subestimar o trabalho de higienização. Por acreditar que o novo sistema vai "resolver" o que a base desorganizada criou.\n\nNão vai.\n\nO novo sistema vai ser, no máximo, tão bom quanto os dados que você colocou dentro dele.\n\nO que vai junto na migração sem saneamento prévio: itens duplicados com nomes diferentes, códigos desatualizados sem correspondência TUSS, fornecedores cadastrados de formas inconsistentes e um histórico de compras que não permite análise comparativa.\n\nA ACT.AI tem um serviço de limpeza de bases que funciona por upload. O processo é simples: você envia a sua base atual, a gente organiza, padroniza e devolve estruturada, pronta pra entrar no novo sistema. Sem necessidade de integração técnica, sem travar o cronograma do projeto.\n\nA janela da migração é curta. Aproveitar ela é uma escolha.\n\nVocê está nessa fase agora? Conta nos comentários ou fala com a gente.\n\n#MigracaoDeERP #GestaoHospitalar #Suprimentos #SistemaHospitalar #SaudeDigital',legenda:''},
+  {id:'p7',day:'14',mon:'Abr',dow:'Ter',mes:'abril',tipo:'carrossel',bar:'var(--c-prod)',title:'ICP Estoque — Quando o sistema diz que tem, mas o almoxarifado não encontra',pil:'Produto & solução · ICP Estoque',act:null,icp:['Gestores de estoque','Almoxarifado','Suprimentos'],produto:['Gestor de Insumos'],just:'Carrossel porque o público de estoque é visual e operacional. Abertura com números concretos cria identificação imediata.',hookLbl:'Legenda do post',hook:'O sistema marca 48 unidades disponíveis. O almoxarife encontra 31. A diferença não está no estoque. Está no cadastro.',isVideo:false,slides:[{n:'Slide 1',titulo:'O gap entre sistema e realidade',texto:'O sistema marca 48 unidades disponíveis. O almoxarife encontra 31.\n\nOnde estão as outras 17? Provavelmente estão, mas com outro nome.\n\n"Seringa 10ml descartável", "seringa descartável 10ml" e "seringa BD 10ml" podem ser o mesmo produto, cadastrado três vezes, contado três vezes, nunca consolidado.'},{n:'Slide 2',titulo:'Por que isso acontece',texto:'Sem um padrão de descrição, cada usuário cadastra do jeito que entende. O problema se acumula silenciosamente.\n\nO resultado:\n• Mesmo produto com três, quatro ou cinco descrições diferentes\n• Histórico de estoque fragmentado e não comparável\n• Inventário que não reflete a realidade física\n• Sistema que não consegue consolidar o que existe de verdade'},{n:'Slide 3',titulo:'O efeito cascata',texto:'Um item mal cadastrado não fica só no estoque. Ele se propaga:\n\n• Compra do item que já estava disponível com outro nome\n• Produtos vencendo porque o sistema não os via como estoque real\n• Desperdício por excesso de itens de baixa rotatividade mal identificados\n• Relatórios de consumo que não batem com o que o almoxarife enxerga'},{n:'Slide 4',titulo:'O que o Gestor de Insumos resolve',texto:'Com o catálogo padronizado pelo Gestor de Insumos da ACT.AI:\n\n• Sistema e almoxarifado passam a falar a mesma língua\n• O inventário reflete o que realmente existe\n• Compras são baseadas em necessidade real, não em percepção distorcida\n• O histórico de consumo é comparável e confiável\n• A contagem cíclica fecha porque os itens estão todos sob o mesmo nome'},{n:'Slide 5',titulo:'A pergunta certa pra fazer hoje',texto:'Quantos itens do seu catálogo atual têm mais de uma descrição para o mesmo produto?\n\nSe você não tem essa resposta, o gap entre sistema e realidade já está acontecendo.\n\nA ACT.AI organiza a base de insumos que sustenta a gestão de estoque na saúde.\nhealthcare.actai.ai'}],legenda:'O sistema marca 48 unidades disponíveis. O almoxarife encontra 31.\n\nA diferença não está no estoque. Está no cadastro.\n\nEsse gap entre sistema e realidade física é um dos problemas mais comuns e mais caros da gestão de materiais hospitalares.\n\nArrasta pra entender o mecanismo e o que muda quando você organiza na raiz.\n\n#GestaoDeEstoque #Almoxarifado #Suprimentos #GestaoHospitalar #SaudeDigital'},
+  {id:'p8',day:'16',mon:'Abr',dow:'Qui',mes:'abril',tipo:'carrossel',bar:'var(--c-aut)',title:'Como melhorar a governança de dados usando IA?',pil:'Autoridade técnica · Governança',act:null,icp:['Líderes de dados','Diretores hospitalares','Executivos healthtech','Investidores'],produto:['Gestor de Insumos','Plataforma ACT.AI'],just:'Carrossel de 6 slides para público estratégico. Conteúdo de autoridade com alta taxa de salvamento.',hookLbl:'Legenda do post',hook:'Governança de dados não é um projeto de TI. É a diferença entre uma instituição que decide com evidência e uma que decide com intuição disfarçada de relatório.',isVideo:false,slides:[{n:'Slide 1',titulo:'O que é governança de dados na prática da saúde',texto:'Governança de dados não é ter um dashboard bonito.\n\nÉ ter certeza de que os dados que alimentam esse dashboard são corretos, rastreáveis e confiáveis.\n\nInsumos e materiais respondem por 35% a 45% do orçamento operacional de um hospital. Medicamentos e OPMEs sozinhos foram de 17% para 20% dos custos hospitalares entre 2020 e 2023.\n\nNa saúde, governança significa: cadastros únicos sem duplicidades, descrições padronizadas, rastreabilidade de cada alteração, conformidade com ANS, ANVISA e TUSS.'},{n:'Slide 2',titulo:'Os três pilares de uma base confiável',texto:'Toda base de dados de saúde que sustenta decisões precisa ser:\n\nAcurada: o dado representa a realidade. Sem erros, sem duplicidades, sem inconsistências técnicas.\n\nRastreável: cada alteração tem origem, responsável e histórico. O dado tem memória.\n\nConforme: alinhada com os padrões regulatórios vigentes, auditável e defensável perante operadoras e órgãos reguladores.'},{n:'Slide 3',titulo:'Onde a IA entra e onde ela falha',texto:'A IA é muito útil pra:\n• Identificar padrões de inconsistência em bases grandes\n• Sugerir padronizações e agrupamentos de itens similares\n• Classificar e enriquecer descrições com base em referências técnicas\n• Detectar duplicidades que escapam à revisão manual\n\nA IA falha quando:\n• A base de entrada não tem estrutura mínima pra orientar o modelo\n• Não há critério técnico definido pra validar as sugestões\n• O processo não tem revisão humana especializada no domínio'},{n:'Slide 4',titulo:'Como estruturar antes de aplicar inteligência',texto:'O caminho correto não começa pela tecnologia. Começa pela base.\n\n1. Mapear o estado atual: volume, duplicidades, ausência de padrão\n2. Definir critérios de padronização\n3. Aplicar IA com critérios definidos: enriquecimento, sugestão, classificação\n4. Validar com especialistas do domínio\n5. Implantar processos de manutenção: governança é contínua'},{n:'Slide 5',titulo:'O resultado de uma base bem governada',texto:'Quando a base está estruturada e a IA está aplicada com critério:\n\n• Relatórios refletem a realidade operacional sem distorções\n• Decisões de compra, estoque e faturamento têm sustentação informacional\n• Auditorias internas e externas encontram dados rastreáveis e defensáveis\n• A transformação digital tem onde se apoiar'},{n:'Slide 6',titulo:'A ACT.AI constrói essa base',texto:'A ACT.AI é especializada em organização de bases cadastrais de insumos de saúde.\n\nCombinamos inteligência artificial com domínio técnico do setor pra transformar bases desorganizadas em infraestrutura confiável pra operação.\n\nAccurate. Compliant. Traceable.\n\nhealthcare.actai.ai'}],legenda:'Governança de dados não é um projeto de TI.\n\nÉ a diferença entre uma instituição que decide com evidência e uma que decide com intuição disfarçada de relatório.\n\nE a IA entra nessa equação, mas não da forma que a maioria imagina. Ela não resolve a desorganização. Ela amplifica o que já existe: estrutura ou caos.\n\n#GovernanaDeDados #IA #SaudeDigital #Healthtech #TransformacaoDigital #GestaoHospitalar'},
+  {id:'p9',day:'21',mon:'Abr',dow:'Ter',mes:'abril',tipo:'video',bar:'var(--c-vid)',title:'Vídeo 3 — T de Traceable',pil:'Vídeo motion · trilogia ACT',act:'T — Traceable',icp:['Gestores hospitalares','Auditoria','Líderes de transformação digital'],produto:['Gestor de Insumos','Plataforma ACT.AI'],just:'Fecha a trilogia. Figurante contextual é o auditor externo. A, C e T se iluminam juntos pela primeira vez — clímax visual de toda a campanha.',hookLbl:'Narração de abertura',hook:'Se você não sabe de onde veio um dado, não pode confiar nele. E se não pode confiar nele, não pode tomar uma decisão baseada nele. Rastreabilidade não é auditoria. É memória. É o terceiro pilar do padrão ACT.',isVideo:true,scenes:[{head:'Cena 1 — A pergunta que trava tudo',visual:'Fundo off-white. Ana está ao monitor. Um ícone de mensagem aparece: "De onde veio esse dado?" Ela abre o sistema. O campo de histórico está vazio. À direita, parcialmente visível, a silhueta cinza de um figurante auditor com prancheta. Ana olha para a tela e depois para ele. Sem resposta.',narr:'Se você não sabe de onde veio um dado, não pode confiar nele.\nE se não pode confiar nele, não pode tomar uma decisão baseada nele.\nRastreabilidade não é auditoria.\nÉ memória.\nÉ o terceiro e último pilar do padrão ACT.'},{head:'Cena 2 — A linha do tempo do dado',visual:'O monitor mostra o Gestor de Insumos com a linha do tempo de um insumo: ponto 1 com ícone de pessoa e data, ponto 2 com ícone de edição e motivo, ponto 3 com ícone de validação e timestamp. Ana lê de cima a baixo. O figurante auditor ao fundo permanece parado, esperando.',narr:'Ser Traceable significa que cada dado tem história.\nQuem inseriu. Quem alterou. Quando. Por quê.\nUma base rastreável é uma base que responde perguntas antes que alguém precise perguntar duas vezes.\nNuma auditoria, isso não é conforto. É vantagem.'},{head:'Cena 3 — Ana responde com dados',visual:'A mesma mensagem da cena 1 reaparece. Ana digita sem pressa. O figurante auditor se aproxima. Na tela, três ícones simples: glosa com checkmark verde, compra com histórico visível, variação de estoque com trilha. O auditor inclina o corpo — postura de quem recebeu o que precisava. Ana se recosta na cadeira.',narr:'Rastreabilidade é o que transforma dado em evidência.\nÉ o que permite defender uma cobrança, justificar uma compra, explicar uma variação de estoque.\nSem rastreabilidade, você tem dados.\nCom rastreabilidade, você tem governança.'},{head:'Cena 4 — Fechamento da trilogia',visual:'O figurante auditor sai de quadro. Ana se levanta e sai pelo lado oposto. Fade para fundo escuro. Logo ACT.AI. A se ilumina. Pausa. C se ilumina. Pausa maior. T se ilumina. Os três juntos em teal pela primeira vez. Tagline: "O padrão que define uma IA confiável na saúde." healthcare.actai.ai ao final.',narr:'Accurate. Compliant. Traceable.\nEsses são os três pilares que definem uma IA confiável na saúde.\nNão como promessa. Como estrutura.\nACT.AI.\nO padrão que a saúde precisa.\nhealthcare.actai.ai'}],legenda:'Dado sem rastreabilidade é dado sem garantia.\n\nNa saúde, isso se traduz em auditorias que consomem semanas, glosas que não têm como contestar e decisões que não têm como justificar.\n\nO terceiro e último pilar do padrão ACT é Traceable. E ele fecha a trilogia sobre o que define uma IA confiável na saúde.\n\nAccurate. Compliant. Traceable.\n\nNão como promessa. Como estrutura.\n\n#ACTai #Traceability #GovernanaDeDados #SaudeDigital #Healthtech #GestaoHospitalar'}
+];
+
+const STORAGE_KEY='actai_posts_v1';
+let posts=[];
+let editMode=false;
+let currentFilter='todos';
+let editingId=null;
+let deletingId=null;
+let cardCount=0;
+let dragSrcId=null;
+
+async function loadData(){
+  try{
+    const r=await window.storage.get(STORAGE_KEY);
+    if(r&&r.value){posts=JSON.parse(r.value);return;}
+  }catch(e){}
+  posts=JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+async function saveData(){
+  const btn=document.getElementById('save-btn');
+  btn.textContent='Salvando...';btn.disabled=true;
+  try{
+    const r=await window.storage.set(STORAGE_KEY,JSON.stringify(posts));
+    if(r){toast('Salvo com sucesso','success');btn.textContent='Salvo ✓';setTimeout(()=>{btn.textContent='Salvar';btn.disabled=false;},2000);}
+    else throw new Error('falhou');
+  }catch(e){toast('Erro ao salvar — exporte o JSON como backup','error');btn.textContent='Salvar';btn.disabled=false;}
+}
+
+function genId(){return 'p'+Date.now()+Math.random().toString(36).slice(2,6);}
+
+function setMode(mode,btn){
+  editMode=mode==='edit';
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('add-btn').style.display=editMode?'inline-flex':'none';
+  const title=document.getElementById('cal-title'),sub=document.getElementById('cal-sub');
+  title.contentEditable=editMode?'true':'false';
+  sub.contentEditable=editMode?'true':'false';
+  if(editMode){title.style.outline='2px dashed var(--border2)';title.style.borderRadius='4px';title.style.padding='2px 4px';sub.style.outline='1px dashed var(--border2)';sub.style.borderRadius='4px';}
+  else{title.style.outline='none';title.style.padding='0';sub.style.outline='none';}
+  render(getFiltered());
+}
+
+function updateStats(){
+  const total=posts.length,vids=posts.filter(p=>p.tipo==='video').length,cars=posts.filter(p=>p.tipo==='carrossel').length,est=posts.filter(p=>p.tipo==='estatico').length;
+  document.getElementById('stats-bar').innerHTML=`<div class="stat"><div class="stat-n">${total}</div><div class="stat-l">publicações</div></div><div class="stat"><div class="stat-n">${vids}</div><div class="stat-l">vídeos · trilogia ACT</div></div><div class="stat"><div class="stat-n">${cars}</div><div class="stat-l">carrosseis</div></div><div class="stat"><div class="stat-n">${est}</div><div class="stat-l">posts estáticos</div></div>`;
+}
+
+function filt(f,btn){currentFilter=f;document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render(getFiltered());}
+function getFiltered(){if(currentFilter==='todos')return posts;return posts.filter(p=>p.tipo===currentFilter||p.mes===currentFilter);}
+
+const MES_LABELS={marco:'Março 2026',abril:'Abril 2026',maio:'Maio 2026',junho:'Junho 2026',julho:'Julho 2026',agosto:'Agosto 2026',setembro:'Setembro 2026',outubro:'Outubro 2026',novembro:'Novembro 2026',dezembro:'Dezembro 2026',janeiro:'Janeiro 2027',fevereiro:'Fevereiro 2027'};
+
+function swapDates(idxA,idxB){const a=posts[idxA],b=posts[idxB];const tmp={day:a.day,mon:a.mon,dow:a.dow,mes:a.mes};a.day=b.day;a.mon=b.mon;a.dow=b.dow;a.mes=b.mes;b.day=tmp.day;b.mon=tmp.mon;b.dow=tmp.dow;b.mes=tmp.mes;}
+
+const typeFmt={estatico:'Estático',carrossel:'Carrossel',video:'Vídeo motion'};
+const typeBadge={estatico:'b-est',carrossel:'b-car',video:'b-vid'};
+const snColor={video:'#0F6E56',carrossel:'#534AB7',estatico:'#0C447C'};
+
+function render(list){
+  const cal=document.getElementById('cal');cal.innerHTML='';cardCount=0;updateStats();
+  if(!list.length){cal.innerHTML='<p style="color:var(--muted);font-size:13px;padding:1rem 0">Nenhum post encontrado.</p>';return;}
+  const monthOrder=[],monthGroups={};
+  list.forEach(p=>{if(!monthGroups[p.mes]){monthGroups[p.mes]=[];monthOrder.push(p.mes);}monthGroups[p.mes].push(p);});
+  monthOrder.forEach(mes=>{
+    const group=monthGroups[mes];
+    const section=document.createElement('div');section.className='month-section';
+    const hdr=document.createElement('div');hdr.className='month-header';hdr.textContent=MES_LABELS[mes]||mes;section.appendChild(hdr);
+    if(editMode){
+      const gIdxs=group.map(p=>posts.findIndex(x=>x.id===p.id));
+      section.appendChild(makeDropZone(gIdxs[0]));
+      group.forEach((p,i)=>{const gi=gIdxs[i];section.appendChild(buildCard(p,gi,posts.length));section.appendChild(makeDropZone(gi+1));});
+    }else{group.forEach(p=>section.appendChild(buildCard(p,-1,-1)));}
+    cal.appendChild(section);
+  });
+}
+
+function makeDropZone(insertIdx){
+  const dz=document.createElement('div');dz.className='drop-zone';dz.dataset.insertIdx=insertIdx;
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dz-active');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('dz-active'));
+  dz.addEventListener('drop',async e=>{
+    e.preventDefault();dz.classList.remove('dz-active');if(!dragSrcId)return;
+    const srcIdx=posts.findIndex(p=>p.id===dragSrcId);if(srcIdx<0)return;
+    let target=parseInt(dz.dataset.insertIdx);
+    if(srcIdx===target||srcIdx===target-1){dragSrcId=null;return;}
+    const destNeighbour=srcIdx<target?target-1:target;
+    swapDates(srcIdx,destNeighbour);
+    const[moved]=posts.splice(srcIdx,1);
+    const newTarget=srcIdx<target?target-1:target;
+    posts.splice(newTarget,0,moved);
+    dragSrcId=null;render(getFiltered());await saveData();
+  });
+  return dz;
+}
+
+function buildCard(p,listIdx,listLen){
+  const id=cardCount++;
+  const card=document.createElement('div');card.className='card';card.dataset.tipo=p.tipo;card.dataset.mes=p.mes;card.dataset.pid=p.id;
+  if(editMode){card.draggable=true;card.addEventListener('dragstart',onDragStart);card.addEventListener('dragend',onDragEnd);}
+  const actHtml=p.act?`<span class="badge b-act">${p.act}</span>`:'';
+  const icpPills=(p.icp||[]).map(i=>`<span class="icp-p">${i}</span>`).join('');
+  const prodPills=(p.produto||[]).map(pr=>`<span class="prod-p">${pr}</span>`).join('');
+  const editActions=editMode?`<span class="drag-handle" title="Arrastar">⠿</span><button class="icon-btn" title="Mover cima" onclick="event.stopPropagation();movePost('${p.id}',-1)" ${listIdx<=0?'disabled':''}>↑</button><button class="icon-btn" title="Mover baixo" onclick="event.stopPropagation();movePost('${p.id}',1)" ${listIdx>=listLen-1?'disabled':''}>↓</button><button class="icon-btn" title="Editar" onclick="event.stopPropagation();openEdit('${p.id}')">✎</button><button class="icon-btn del" title="Remover" onclick="event.stopPropagation();askDelete('${p.id}')">✕</button>`:'';
+  let tabsHtml='';
+  if(p.isVideo){
+    const scenesHtml=(p.scenes||[]).map(s=>`<div class="scene-block"><div class="scene-head">${s.head}</div><div class="scene-body"><div><div class="scene-col-lbl">Visual / Motion</div><div class="scene-col-text">${esc(s.visual)}</div></div><div><div class="scene-col-lbl">Narração</div><div class="scene-col-text narr">${esc(s.narr)}</div></div></div></div>`).join('');
+    const legEsc=esc(p.legenda||'');
+    tabsHtml=`<div class="det-tabs"><div class="tab-nav"><button class="tab-btn on" onclick="switchTab(${id},0,this)">Roteiro de cenas</button><button class="tab-btn" onclick="switchTab(${id},1,this)">Legenda do post</button><button class="tab-btn" onclick="switchTab(${id},2,this)">Personagem</button></div><div class="tab-panel on" id="tab-${id}-0">${scenesHtml}</div><div class="tab-panel" id="tab-${id}-1"><div class="full-text">${legEsc}</div><button class="copy-btn" onclick="copyText(this,'${encodeURIComponent(p.legenda||'')}')">Copiar legenda</button></div><div class="tab-panel" id="tab-${id}-2">${charBrief()}</div></div>`;
+  }else if(p.tipo==='carrossel'){
+    const slidesHtml=(p.slides||[]).map(s=>`<div class="slide-row"><div class="sn" style="color:${snColor[p.tipo]}">${s.n}</div><div style="flex:1;min-width:0"><div class="slide-title">${esc(s.titulo||'')}</div><div class="st">${esc(s.texto||'')}</div></div></div>`).join('');
+    const legEsc=esc(p.legenda||'');
+    tabsHtml=`<div class="det-tabs"><div class="tab-nav"><button class="tab-btn on" onclick="switchTab(${id},0,this)">Conteúdo dos slides</button><button class="tab-btn" onclick="switchTab(${id},1,this)">Legenda do post</button></div><div class="tab-panel on" id="tab-${id}-0">${slidesHtml||'<p style="color:var(--muted);font-size:13px">Nenhum slide cadastrado.</p>'}</div><div class="tab-panel" id="tab-${id}-1"><div class="full-text">${legEsc}</div><button class="copy-btn" onclick="copyText(this,'${encodeURIComponent(p.legenda||'')}')">Copiar legenda</button></div></div>`;
+  }else{
+    const txt=p.textoCompleto||p.legenda||'';
+    tabsHtml=`<div class="det-tabs"><div class="tab-nav"><button class="tab-btn on" onclick="switchTab(${id},0,this)">Texto completo do post</button></div><div class="tab-panel on" id="tab-${id}-0"><div class="full-text">${esc(txt)}</div><button class="copy-btn" onclick="copyText(this,'${encodeURIComponent(txt)}')">Copiar texto</button></div></div>`;
+  }
+  const hookIsVid=p.isVideo?' vid':'';
+  card.innerHTML=`<div class="ch" onclick="tog(this.parentElement)"><div class="db"><div class="dd">${p.day}</div><div class="di">${p.mon} · ${p.dow}</div></div><div class="bar" style="background:${p.bar}"></div><div class="cm"><div class="ct">${esc(p.title)}</div><div class="cb"><span class="badge ${typeBadge[p.tipo]}">${typeFmt[p.tipo]}</span>${actHtml}<span class="b-pil">${esc(p.pil||'')}</span></div></div><div class="card-actions">${editActions}<div class="chev">▼</div></div></div><div class="det"><div class="det-meta"><div><div class="dl">Justificativa do formato</div><div class="dt">${esc(p.just||'')}</div></div><div><div style="margin-bottom:12px"><div class="dl">ICP alvo</div><div class="pill-row">${icpPills||'<span style="font-size:12px;color:var(--muted)">—</span>'}</div></div><div><div class="dl">Produto em destaque</div><div class="pill-row">${prodPills||'<span style="font-size:12px;color:var(--muted)">—</span>'}</div></div></div></div><div class="det-hook"><div class="hook-box${hookIsVid}"><div class="hook-lbl">${esc(p.hookLbl||'Abertura')}</div>${esc(p.hook||'')}</div></div>${tabsHtml}</div>`;
+  return card;
+}
+
+function charBrief(){return `<div class="scene-block"><div class="scene-head" style="background:#E6F1FB;color:#0C447C">Personagem principal — Ana</div><div style="padding:13px;display:grid;grid-template-columns:1fr 1fr;gap:13px"><div><div class="scene-col-lbl">Construção visual (minimalista)</div><div class="scene-col-text">Formas geométricas básicas: círculo para cabeça, retângulos para corpo e membros. Sem detalhes faciais elaborados. Expressões por postura corporal. Paleta máxima de 3 cores: azul escuro #0A2F4E (roupa/cabelo), off-white #F5F5F0 (pele/fundo), teal #0D7F5F reservado para momentos de solução. Sem gradientes, sombras ou texturas.</div></div><div><div class="scene-col-lbl">Figurantes contextuais</div><div class="scene-col-text">Mesmas formas simples de Ana, sempre em cinza #888780. V1: colega de TI ao fundo (indiferente ao problema). V2: auditora externa com prancheta (pressão regulatória). V3: auditor externo com prancheta (a pergunta sem resposta). Aparecem em segundo plano, nunca protagonizam.</div></div></div></div>`;}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function tog(card){card.classList.toggle('open');}
+function switchTab(id,idx,btn){const panel=btn.closest('.det-tabs');panel.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('on'));btn.classList.add('on');panel.querySelector('#tab-'+id+'-'+idx).classList.add('on');}
+function copyText(btn,enc){navigator.clipboard.writeText(decodeURIComponent(enc)).then(()=>{btn.textContent='Copiado!';btn.classList.add('copied');setTimeout(()=>{btn.textContent=btn.textContent.includes('legenda')?'Copiar legenda':'Copiar texto';btn.classList.remove('copied');},2000);});}
+
+function onDragStart(e){dragSrcId=this.dataset.pid;this.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',dragSrcId);}
+function onDragEnd(){this.classList.remove('dragging');document.querySelectorAll('.drop-zone').forEach(dz=>dz.classList.remove('dz-active'));}
+
+async function movePost(pid,dir){
+  const idx=posts.findIndex(p=>p.id===pid);if(idx<0)return;
+  const target=idx+dir;if(target<0||target>=posts.length)return;
+  swapDates(idx,target);const[moved]=posts.splice(idx,1);posts.splice(target,0,moved);
+  render(getFiltered());await saveData();
+}
+
+function openAdd(){editingId=null;document.getElementById('modal-title').textContent='Novo post';renderModalForm(null);document.getElementById('overlay').classList.add('open');}
+function openEdit(pid){editingId=pid;const p=posts.find(x=>x.id===pid);document.getElementById('modal-title').textContent='Editar post';renderModalForm(p);document.getElementById('overlay').classList.add('open');}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+function overlayClick(e){if(e.target===document.getElementById('overlay'))closeModal();}
+function barForTipo(tipo){const map={estatico:'var(--c-edu)',carrossel:'var(--c-prod)',video:'var(--c-vid)'};return map[tipo]||'var(--c-edu)';}
+
+function renderModalForm(p){
+  const tipo=p?.tipo||'estatico';
+  document.getElementById('modal-body').innerHTML=`<div class="field-row"><div class="field"><label>Dia</label><input id="f-day" type="text" placeholder="ex: 24" value="${p?.day||''}"></div><div class="field"><label>Mês (exibição)</label><input id="f-mon" type="text" placeholder="ex: Mar" value="${p?.mon||''}"></div><div class="field"><label>Dia semana</label><input id="f-dow" type="text" placeholder="ex: Ter" value="${p?.dow||''}"></div></div><div class="field-row"><div class="field"><label>Mês (filtro)</label><select id="f-mes"><option value="marco" ${p?.mes==='marco'?'selected':''}>marco</option><option value="abril" ${p?.mes==='abril'?'selected':''}>abril</option><option value="maio" ${p?.mes==='maio'?'selected':''}>maio</option><option value="junho" ${p?.mes==='junho'?'selected':''}>junho</option></select></div><div class="field"><label>Tipo</label><select id="f-tipo" onchange="updateModalType()"><option value="estatico" ${tipo==='estatico'?'selected':''}>Post estático</option><option value="carrossel" ${tipo==='carrossel'?'selected':''}>Carrossel</option><option value="video" ${tipo==='video'?'selected':''}>Vídeo motion</option></select></div></div><div class="field"><label>Título do post</label><input id="f-title" type="text" value="${p?.title||''}"></div><div class="field"><label>Pilar / subtítulo</label><input id="f-pil" type="text" value="${p?.pil||''}"></div><div class="field"><label>Badge ACT (opcional)</label><input id="f-act" type="text" placeholder="ex: A — Accurate" value="${p?.act||''}"></div><div class="field"><label>ICP alvo (vírgula)</label><input id="f-icp" type="text" value="${(p?.icp||[]).join(', ')}"></div><div class="field"><label>Produto (vírgula)</label><input id="f-prod" type="text" value="${(p?.produto||[]).join(', ')}"></div><div class="field"><label>Justificativa do formato</label><textarea id="f-just" rows="3">${p?.just||''}</textarea></div><div class="field"><label>Label do gancho</label><input id="f-hookLbl" type="text" value="${p?.hookLbl||'Abertura do post'}"></div><div class="field"><label>Texto do gancho</label><textarea id="f-hook" rows="3">${p?.hook||''}</textarea></div><div id="f-slides-wrap" style="${tipo==='carrossel'?'':'display:none'}"><div class="dl" style="margin-bottom:8px">Slides do carrossel</div><div class="slides-editor" id="slides-editor">${buildSlidesEditor(p?.slides||[])}</div><button type="button" class="add-slide-btn" onclick="addSlide()">+ Adicionar slide</button></div><div id="f-scenes-wrap" style="${tipo==='video'?'':'display:none'}"><div class="dl" style="margin-bottom:8px">Cenas do vídeo</div><div class="slides-editor" id="scenes-editor">${buildScenesEditor(p?.scenes||[])}</div><button type="button" class="add-slide-btn" onclick="addScene()">+ Adicionar cena</button></div><div id="f-texto-wrap" style="${tipo==='estatico'?'':'display:none'}"><div class="field"><label>Texto completo do post</label><textarea id="f-texto" rows="10">${p?.textoCompleto||''}</textarea></div></div><div class="field"><label>Legenda do post (LinkedIn)</label><textarea id="f-legenda" rows="6">${p?.legenda||''}</textarea></div>`;
+}
+
+function updateModalType(){const tipo=document.getElementById('f-tipo').value;document.getElementById('f-slides-wrap').style.display=tipo==='carrossel'?'':'none';document.getElementById('f-scenes-wrap').style.display=tipo==='video'?'':'none';document.getElementById('f-texto-wrap').style.display=tipo==='estatico'?'':'none';}
+
+function buildSlidesEditor(slides){return slides.map((s,i)=>`<div class="slide-ed-item" data-idx="${i}"><div class="slide-ed-head"><span>Slide ${i+1}</span><button type="button" class="slide-ed-del" onclick="removeSlide(${i})">remover</button></div><div class="field" style="margin-bottom:8px"><label>Título</label><input class="sl-titulo" type="text" value="${s.titulo||''}"></div><div class="field"><label>Texto</label><textarea class="sl-texto" rows="4">${s.texto||''}</textarea></div></div>`).join('');}
+function buildScenesEditor(scenes){return scenes.map((s,i)=>`<div class="scene-ed-item" data-idx="${i}"><div class="scene-ed-head"><span>Cena ${i+1}</span><button type="button" class="slide-ed-del" onclick="removeScene(${i})" style="margin-left:auto">remover</button></div><div class="field" style="margin-bottom:8px"><label>Título da cena</label><input class="sc-head" type="text" value="${s.head||''}"></div><div class="field" style="margin-bottom:8px"><label>Visual / Motion</label><textarea class="sc-visual" rows="3">${s.visual||''}</textarea></div><div class="field"><label>Narração</label><textarea class="sc-narr" rows="3">${s.narr||''}</textarea></div></div>`).join('');}
+
+function addSlide(){const ed=document.getElementById('slides-editor');const cur=ed.querySelectorAll('.slide-ed-item').length;const div=document.createElement('div');div.className='slide-ed-item';div.dataset.idx=cur;div.innerHTML=`<div class="slide-ed-head"><span>Slide ${cur+1}</span><button type="button" class="slide-ed-del" onclick="removeSlide(${cur})">remover</button></div><div class="field" style="margin-bottom:8px"><label>Título</label><input class="sl-titulo" type="text" value=""></div><div class="field"><label>Texto</label><textarea class="sl-texto" rows="4"></textarea></div>`;ed.appendChild(div);}
+function removeSlide(idx){const items=[...document.querySelectorAll('#slides-editor .slide-ed-item')];if(items[idx])items[idx].remove();document.querySelectorAll('#slides-editor .slide-ed-item').forEach((el,i)=>{el.dataset.idx=i;el.querySelector('span').textContent='Slide '+(i+1);const b=el.querySelector('.slide-ed-del');if(b)b.setAttribute('onclick','removeSlide('+i+')')});}
+function addScene(){const ed=document.getElementById('scenes-editor');const cur=ed.querySelectorAll('.scene-ed-item').length;const div=document.createElement('div');div.className='scene-ed-item';div.dataset.idx=cur;div.innerHTML=`<div class="scene-ed-head"><span>Cena ${cur+1}</span><button type="button" class="slide-ed-del" onclick="removeScene(${cur})" style="margin-left:auto">remover</button></div><div class="field" style="margin-bottom:8px"><label>Título</label><input class="sc-head" type="text" value=""></div><div class="field" style="margin-bottom:8px"><label>Visual</label><textarea class="sc-visual" rows="3"></textarea></div><div class="field"><label>Narração</label><textarea class="sc-narr" rows="3"></textarea></div>`;ed.appendChild(div);}
+function removeScene(idx){const items=[...document.querySelectorAll('#scenes-editor .scene-ed-item')];if(items[idx])items[idx].remove();document.querySelectorAll('#scenes-editor .scene-ed-item').forEach((el,i)=>{el.dataset.idx=i;el.querySelector('span').textContent='Cena '+(i+1);const b=el.querySelector('.slide-ed-del');if(b)b.setAttribute('onclick','removeScene('+i+')')});}
+
+async function savePost(){
+  const tipo=document.getElementById('f-tipo').value;
+  const slides=tipo==='carrossel'?[...document.querySelectorAll('#slides-editor .slide-ed-item')].map((el,i)=>({n:'Slide '+(i+1),titulo:el.querySelector('.sl-titulo')?.value||'',texto:el.querySelector('.sl-texto')?.value||''})):[];
+  const scenes=tipo==='video'?[...document.querySelectorAll('#scenes-editor .scene-ed-item')].map((el,i)=>({head:el.querySelector('.sc-head')?.value||'Cena '+(i+1),visual:el.querySelector('.sc-visual')?.value||'',narr:el.querySelector('.sc-narr')?.value||''})):[];
+  const newPost={id:editingId||genId(),day:document.getElementById('f-day').value.trim(),mon:document.getElementById('f-mon').value.trim(),dow:document.getElementById('f-dow').value.trim(),mes:document.getElementById('f-mes').value,tipo,bar:barForTipo(tipo),title:document.getElementById('f-title').value.trim(),pil:document.getElementById('f-pil').value.trim(),act:document.getElementById('f-act').value.trim()||null,icp:document.getElementById('f-icp').value.split(',').map(s=>s.trim()).filter(Boolean),produto:document.getElementById('f-prod').value.split(',').map(s=>s.trim()).filter(Boolean),just:document.getElementById('f-just').value.trim(),hookLbl:document.getElementById('f-hookLbl').value.trim(),hook:document.getElementById('f-hook').value.trim(),isVideo:tipo==='video',slides,scenes,textoCompleto:tipo==='estatico'?document.getElementById('f-texto').value:'',legenda:document.getElementById('f-legenda').value};
+  if(!newPost.title){toast('O título é obrigatório','error');return;}
+  if(editingId){const idx=posts.findIndex(p=>p.id===editingId);if(idx>=0)posts[idx]=newPost;}else{posts.push(newPost);}
+  closeModal();render(getFiltered());await saveData();toast(editingId?'Post atualizado':'Post criado','success');
+}
+
+function askDelete(pid){deletingId=pid;document.getElementById('confirm-overlay').classList.add('open');}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');deletingId=null;}
+function confirmOverlayClick(e){if(e.target===document.getElementById('confirm-overlay'))closeConfirm();}
+async function confirmDelete(){if(!deletingId)return;posts=posts.filter(p=>p.id!==deletingId);closeConfirm();render(getFiltered());await saveData();toast('Post removido','success');}
+
+function exportJSON(){const blob=new Blob([JSON.stringify(posts,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='actai_calendario_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('JSON exportado','success');}
+function importJSON(){document.getElementById('import-input').click();}
+function handleImport(e){const f=e.target.files[0];if(!f)return;const reader=new FileReader();reader.onload=async ev=>{try{const data=JSON.parse(ev.target.result);if(!Array.isArray(data))throw new Error('Formato inválido');posts=data;await saveData();render(getFiltered());toast('Calendário importado','success');}catch(err){toast('Erro ao importar: formato inválido','error');}};reader.readAsText(f);e.target.value='';}
+
+let toastTimer;
+function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className='toast'+(type?' '+type:'');void el.offsetWidth;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeConfirm();}if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveData();}});
+
+document.getElementById('cal').innerHTML='<p style="color:var(--muted);font-size:13px;padding:2rem 0;text-align:center">Carregando...</p>';
+loadData().then(()=>{render(getFiltered());updateStats();});
+<\/script>
+`;
+}
+</script>
+
+</body>
+</html>
